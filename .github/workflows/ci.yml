@@ -32,7 +32,7 @@ jobs:
       PGUSER: atlas
       PGPASSWORD: ci-only-password
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # psql and pgbench: GitHub's Ubuntu images ship PostgreSQL binaries
       # (server stopped); install them only if missing. pgbench lives in the
       # server package, not postgresql-client.
@@ -68,7 +68,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -95,7 +95,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -126,7 +126,7 @@ jobs:
     name: Workflows, Dockerfiles, observability config
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fetch verified tools
         run: for t in actionlint hadolint promtool; do scripts/ci/fetch-tool.sh "$t" "$RUNNER_TEMP/bin"; done
       - name: actionlint
@@ -154,7 +154,7 @@ jobs:
     name: Secrets and dependency advisories
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # scan the whole history, not just the last commit
       - name: gitleaks (history + working tree)
@@ -186,7 +186,7 @@ jobs:
       COMPOSE_PROFILES: app
       WEB: http://127.0.0.1:8088
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: CI-only secrets (generated per run, never stored)
         run: |
           {
