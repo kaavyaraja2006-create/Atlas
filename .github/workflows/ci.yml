@@ -96,7 +96,7 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -162,7 +162,7 @@ jobs:
           scripts/ci/fetch-tool.sh gitleaks "$RUNNER_TEMP/bin"
           "$RUNNER_TEMP/bin/gitleaks" git . --redact --no-banner
           "$RUNNER_TEMP/bin/gitleaks" dir . --redact --no-banner
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - name: npm audit (production and dev dependencies)
