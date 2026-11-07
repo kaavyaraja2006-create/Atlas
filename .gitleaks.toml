@@ -1,0 +1,10 @@
+# gitleaks configuration: the default rules plus one narrow allowlist.
+# Every allowlisted pattern says why it is not a secret.
+# (gitleaks 8.21 syntax: a single [allowlist] table.)
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Idempotency-Key values in frontend tests are request identifiers, not credentials"
+regexTarget = "line"
+regexes = ['''[Ii]dempotency.{0,8}['"]key-12345678['"]''']

@@ -1,0 +1,57 @@
+name: Deploy
+
+# Manual: builds both images at this commit, pushes them to ECR (immutable tags = the
+# commit SHA), registers a task definition revision with the new images and rolls the
+# service. Needs repository variables AWS_REGION and AWS_DEPLOY_ROLE_ARN (Terraform
+# output deploy_role_arn). No AWS keys are stored in GitHub: OIDC only.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      PROJECT: atlas
+      TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Build and push images
+        run: |
+          registry="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_REGION}.amazonaws.com"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "$registry"
+          docker build -t "$registry/$PROJECT-api:$TAG" backend
+          docker build -t "$registry/$PROJECT-web:$TAG" frontend
+          docker push "$registry/$PROJECT-api:$TAG"
+          docker push "$registry/$PROJECT-web:$TAG"
+          echo "REGISTRY=$registry" >> "$GITHUB_ENV"
+      - name: Register a task definition with the new images
+        run: |
+          aws ecs describe-task-definition --task-definition "$PROJECT" --query taskDefinition > current.json
+          jq --arg api "$REGISTRY/$PROJECT-api:$TAG" --arg web "$REGISTRY/$PROJECT-web:$TAG" '
+            .containerDefinitions |= map(if .name == "api" then .image = $api elif .name == "web" then .image = $web else . end)
+            | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)
+          ' current.json > next.json
+          arn=$(aws ecs register-task-definition --cli-input-json file://next.json --query taskDefinition.taskDefinitionArn --output text)
+          echo "TASK_DEF=$arn" >> "$GITHUB_ENV"
+      - name: Roll out (the circuit breaker rolls back a version that never becomes healthy)
+        run: |
+          aws ecs update-service --cluster "$PROJECT" --service "$PROJECT" --task-definition "$TASK_DEF" >/dev/null
+          aws ecs wait services-stable --cluster "$PROJECT" --services "$PROJECT"
+          running=$(aws ecs describe-services --cluster "$PROJECT" --services "$PROJECT" \
+            --query 'services[0].deployments[?status==`PRIMARY`].taskDefinition' --output text)
+          test "$running" = "$TASK_DEF" || { echo "rolled back to $running"; exit 1; }

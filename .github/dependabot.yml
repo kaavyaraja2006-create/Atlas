@@ -1,0 +1,28 @@
+# Weekly dependency updates. Security updates arrive as soon as an advisory is published
+# (enable "Dependabot security updates" in the repository settings).
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Spring Boot 3.5 reached the end of open-source support with 3.5.16. Moving to 4.x is a
+    # planned migration (Spring Framework 7, Jackson 3), not an automatic bump.
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  # Base images use version tags; Dependabot proposes updates (pinning by digest is a follow-up).
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly

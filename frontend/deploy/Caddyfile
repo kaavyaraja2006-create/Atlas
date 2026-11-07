@@ -1,0 +1,69 @@
+# ATLAS web tier: serves the built SPA and proxies /api to the backend on the same
+# origin (no CORS, no cookies across sites). TLS terminates at the load balancer.
+#
+#   ATLAS_API_UPSTREAM   backend address, default 127.0.0.1:8081 (same ECS task)
+#   ATLAS_WEB_PORT       listen port, default 8080 (non-root)
+#
+# csp.caddy is generated at image build from the built index.html
+# (frontend/e2e/csp-policy.mjs), so the policy always matches the page.
+{
+	admin off
+	auto_https off
+	# Write nothing to disk: the container's root filesystem is read-only (no TLS here,
+	# so certificate storage and its periodic cleaning are not needed).
+	persist_config off
+	storage_check off
+	storage_clean_interval off
+	servers {
+		# The load balancer is in a private range and APPENDS the client address to
+		# X-Forwarded-For; anything to its left was written by the client. Strict mode
+		# reads right to left and stops at the first untrusted hop: the real client.
+		trusted_proxies static private_ranges
+		trusted_proxies_strict
+		client_ip_headers X-Forwarded-For
+	}
+}
+
+:{$ATLAS_WEB_PORT:8080} {
+	encode zstd gzip
+
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Cross-Origin-Opener-Policy same-origin
+	}
+
+	# Load-balancer health check: healthy only when the backend is ready.
+	handle /healthz {
+		rewrite * /actuator/health/readiness
+		reverse_proxy {$ATLAS_API_UPSTREAM:127.0.0.1:8081}
+	}
+
+	# The backend's own headers (its API CSP, cache rules) pass through unchanged.
+	handle /api/* {
+		reverse_proxy {$ATLAS_API_UPSTREAM:127.0.0.1:8081} {
+			# One clean address for the backend's per-client rate limits: Spring reads the
+			# leftmost X-Forwarded-For value, which must never be client-controlled.
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+
+	# Management endpoints (metrics) are scraped inside the network, never through here.
+	handle /actuator/* {
+		respond 404
+	}
+
+	handle {
+		root * /srv
+		import /etc/caddy/csp.caddy
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		@notAssets not path /assets/*
+		header @notAssets Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}

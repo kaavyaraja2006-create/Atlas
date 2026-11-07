@@ -1,0 +1,52 @@
+/* React Flow themed with the ATLAS tokens, so light and dark follow the app's theme class. */
+.lineage-canvas .react-flow {
+  --xy-background-color: rgb(var(--surface));
+  --xy-background-pattern-dots-color-default: rgb(var(--border));
+  --xy-edge-stroke-default: rgb(var(--muted));
+  --xy-minimap-background-color-default: rgb(var(--surface-2));
+  --xy-minimap-mask-background-color-default: rgb(var(--bg) / 0.6);
+  --xy-attribution-background-color-default: rgb(var(--surface) / 0.7);
+  --xy-handle-background-color-default: transparent;
+  --xy-handle-border-color-default: transparent;
+  color: rgb(var(--text));
+}
+
+.lineage-canvas .react-flow__node-version {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.lineage-canvas .react-flow__attribution a {
+  color: rgb(var(--muted));
+  text-decoration: underline;
+}
+
+.lineage-edge {
+  stroke: rgb(var(--muted));
+  stroke-width: 1.5;
+}
+
+.lineage-edge--dim {
+  opacity: 0.25;
+}
+
+.lineage-edge-label {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 4px;
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  padding: 1px 5px;
+  font-size: 10px;
+  color: rgb(var(--muted));
+  white-space: nowrap;
+}
+
+.lineage-canvas .minimap-node {
+  fill: rgb(var(--muted) / 0.5);
+}
+
+.lineage-canvas .minimap-root {
+  fill: rgb(var(--accent));
+}

@@ -1,0 +1,39 @@
+# Build output
+target/
+node_modules/
+dist/
+
+# Local secrets and env
+.env
+*.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Benchmark raw output is committed deliberately under docs/experiments/raw;
+# scratch runs go here instead.
+load-tests/out/
+
+# Frontend screenshot runs
+frontend/e2e/out/
+
+__pycache__/
+*.pyc
+
+# Prometheus scrape password for the local observability profile
+ops/prometheus/metrics-password
+
+# Infrastructure
+infra/terraform/.terraform/
+infra/terraform/.terraform.lock.hcl
+infra/terraform/backend.hcl
+infra/terraform/*.tfvars
+!infra/terraform/*.tfvars.example
+infra/terraform/*.tfstate*
+
+# Demo seed output (contains generated passwords)
+demo-credentials.txt
+demo-summary.json

@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: atlas
+  datasource:
+    # No credentials in source: values come from the environment (.env locally,
+    # a secrets manager in deployed environments). Startup fails if missing.
+    url: ${ATLAS_DB_URL:jdbc:postgresql://localhost:5432/atlas}
+    username: ${ATLAS_DB_USER}
+    password: ${ATLAS_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${ATLAS_DB_POOL_SIZE:10}
+  flyway:
+    enabled: true
+    validate-on-migrate: true
+
+server:
+  # Behind a reverse proxy set to "framework" so the client address (rate limits,
+  # login history) is the real client's. Leave "none" when clients connect directly.
+  forward-headers-strategy: ${ATLAS_FORWARD_HEADERS:none}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # prometheus has its own security chain (HTTP Basic, denied unless configured)
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+  # Traces: OpenTelemetry over OTLP, off unless enabled (sampling 0 sends nothing).
+  tracing:
+    enabled: ${ATLAS_TRACING_ENABLED:false}
+    sampling:
+      probability: ${ATLAS_TRACE_SAMPLING:0.1}
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    tags:
+      application: atlas
+    # Histogram buckets so Prometheus can compute p95 (alert AtlasReadLatencyHigh, NFR-PERF-1).
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,300ms,1s
+
+
+logging:
+  pattern:
+    level: "%5p [cid:%X{correlationId:-none} trace:%X{traceId:-}]"
+
+atlas:
+  # ATLAS X: continuous integrity monitoring (rules are configured per organization).
+  integrity:
+    enabled: ${ATLAS_INTEGRITY_ENABLED:true}
+    interval: ${ATLAS_INTEGRITY_INTERVAL:PT1H}
+    initial-delay: PT5M
+  # ATLAS X: counterfactual simulation runs are operational evidence, kept for this many days.
+  simulation:
+    retention-days: ${ATLAS_SIMULATION_RETENTION_DAYS:180}
+  auth:
+    # Base64 of >= 32 random bytes, e.g. `openssl rand -base64 48`. No default on purpose.
+    jwt-secret: ${ATLAS_JWT_SECRET:}
+    access-token-ttl: PT15M
+    refresh-token-ttl: P14D
+    cookie-secure: ${ATLAS_COOKIE_SECURE:true}
+    max-failed-logins: 5
+    lock-duration: PT15M
+  metrics:
+    # Prometheus scrape credentials (basic_auth). Unset: /actuator/prometheus refuses everyone.
+    username: ${ATLAS_METRICS_USERNAME:}
+    password: ${ATLAS_METRICS_PASSWORD:}
+  audit:
+    anchor:
+      # Off by default. To enable, generate keys with com.atlas.audit.anchor.AnchorKeys and point
+      # the directory at storage the database administrators cannot rewrite.
+      enabled: ${ATLAS_ANCHOR_ENABLED:false}
+      directory: ${ATLAS_ANCHOR_DIR:}
+      key-id: ${ATLAS_ANCHOR_KEY_ID:}
+      private-key: ${ATLAS_ANCHOR_PRIVATE_KEY:}
+      public-keys: ${ATLAS_ANCHOR_PUBLIC_KEYS:}
+      interval: ${ATLAS_ANCHOR_INTERVAL:PT5M}

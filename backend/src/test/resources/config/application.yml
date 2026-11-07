@@ -1,0 +1,19 @@
+# TEST-ONLY configuration, loaded on top of the main application.yml when tests run.
+# No JWT secret here: com.atlas.support.TestJwtSecret generates one per test run
+# with SecureRandom, so no signing key is committed anywhere.
+spring:
+  datasource:
+    username: test     # replaced by the Testcontainers connection details
+    password: test
+atlas:
+  integrity:
+    enabled: false   # no scheduled checks during tests; IntegrityIT runs them on demand
+  auth:
+    cookie-secure: false   # the test client talks plain HTTP to localhost
+  # The suite registers and signs in many users from one address. Limits stay on (the
+  # filter runs on every request) but high; RateLimitIT checks the 429 with tiny ones.
+  rate-limit:
+    sign-in-per-minute: 1000000
+    registrations-per-hour: 1000000
+    refreshes-per-minute: 1000000
+    api-per-minute: 1000000

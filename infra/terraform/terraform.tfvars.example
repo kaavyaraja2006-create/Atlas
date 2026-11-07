@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (git-ignored).
+certificate_arn   = "arn:aws:acm:ap-south-1:123456789012:certificate/CHANGE-ME"
+api_image         = "123456789012.dkr.ecr.ap-south-1.amazonaws.com/atlas-api:bootstrap"
+web_image         = "123456789012.dkr.ecr.ap-south-1.amazonaws.com/atlas-web:bootstrap"
+alarm_email       = ""
+github_repository = "kaavyaraja2006-create/atlas"

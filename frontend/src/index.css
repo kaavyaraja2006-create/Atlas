@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens from docs/ux/page-map-and-design-system.md (RGB triplets for alpha support). */
+:root {
+  --bg: 247 248 250;
+  --surface: 255 255 255;
+  --surface-2: 243 245 248;
+  --border: 227 230 235;
+  --text: 20 24 31;
+  --muted: 91 100 114;
+  --accent: 29 78 216;
+  --accent-fg: 255 255 255;
+  --success: 22 101 52;   /* green-800: >= 4.5:1 on its own 10% tint (axe, Phase 9) */
+  --warning: 146 64 14;   /* amber-800: same reason */
+  --danger: 185 28 28;
+  --info: 3 105 161;
+  --sidebar: 15 27 45;
+  --sidebar-text: 201 211 227;
+  --sidebar-active: 255 255 255;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 11 15 23;
+  --surface: 18 24 38;
+  --surface-2: 24 31 47;
+  --border: 35 43 58;
+  --text: 230 233 239;
+  --muted: 152 162 179;
+  --accent: 91 140 255;
+  --accent-fg: 11 15 23;
+  --success: 74 222 128;
+  --warning: 251 191 36;
+  --danger: 248 113 113;
+  --info: 56 189 248;
+  --sidebar: 8 12 20;
+  --sidebar-text: 168 180 200;
+  --sidebar-active: 255 255 255;
+  color-scheme: dark;
+}
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-bg text-text font-sans text-sm antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  .num { font-variant-numeric: tabular-nums; }
+  :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+  dialog::backdrop { background: rgb(0 0 0 / 0.45); }
+}

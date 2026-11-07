@@ -1,0 +1,80 @@
+/* React Flow themed with the ATLAS tokens for the ER diagram (light and dark follow the app). */
+.schema-diagram .react-flow {
+  --xy-background-color: rgb(var(--bg));
+  --xy-background-pattern-dots-color-default: rgb(var(--border));
+  --xy-minimap-background-color-default: rgb(var(--surface-2));
+  --xy-minimap-mask-background-color-default: rgb(var(--bg) / 0.6);
+  --xy-attribution-background-color-default: rgb(var(--surface) / 0.7);
+  --xy-handle-background-color-default: transparent;
+  --xy-handle-border-color-default: transparent;
+  color: rgb(var(--text));
+}
+
+.schema-diagram .react-flow__node-table {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.schema-diagram .react-flow__attribution a {
+  color: rgb(var(--muted));
+  text-decoration: underline;
+}
+
+.schema-edge {
+  stroke: rgb(var(--muted));
+  stroke-width: 1.25;
+}
+
+.schema-edge--inferred {
+  stroke-dasharray: 5 4;
+  stroke: rgb(var(--warning));
+}
+
+.schema-edge--selected {
+  stroke: rgb(var(--accent));
+  stroke-width: 2.5;
+}
+
+.schema-edge--dim {
+  opacity: 0.15;
+}
+
+.schema-edge-label {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 4px;
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  padding: 0 4px;
+  font-size: 10px;
+  color: rgb(var(--muted));
+  white-space: nowrap;
+}
+
+.schema-table--added {
+  box-shadow: 0 0 0 2px rgb(var(--success));
+}
+
+.schema-table--changed {
+  box-shadow: 0 0 0 2px rgb(var(--warning));
+}
+
+.schema-legend {
+  display: inline-block;
+  width: 22px;
+  vertical-align: middle;
+  border-top: 2px solid rgb(var(--muted));
+}
+
+.schema-legend--inferred {
+  border-top: 2px dashed rgb(var(--warning));
+}
+
+.schema-diagram .minimap-table {
+  fill: rgb(var(--muted) / 0.5);
+}
+
+.schema-diagram .minimap-selected {
+  fill: rgb(var(--accent));
+}

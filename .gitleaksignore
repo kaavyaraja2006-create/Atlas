@@ -1,0 +1,6 @@
+# Findings in git history that are reviewed and accepted. Each line is a gitleaks fingerprint.
+#
+# A JWT signing key that only ever configured the integration-test suite (commit e1a27618,
+# Phase 2). It never protected a deployed system. Since Phase 8 the tests generate a
+# random key per run; this line keeps the old commit from failing every history scan.
+e1a27618f04f1c2ba13c56d8888f2f1d1548179c:backend/src/test/resources/config/application.yml:generic-api-key:9
