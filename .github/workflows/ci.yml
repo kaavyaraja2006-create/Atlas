@@ -54,7 +54,7 @@ jobs:
         run: |
           python3 -I scripts/check-authorization.py --markdown "$RUNNER_TEMP/endpoint-permissions.md" >/dev/null
           diff -u docs/security/endpoint-permissions.md "$RUNNER_TEMP/endpoint-permissions.md"
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
@@ -69,7 +69,7 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
