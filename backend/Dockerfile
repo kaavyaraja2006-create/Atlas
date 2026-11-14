@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn -q -B -DskipTests package && cp target/atlas-backend-*.jar /app.jar
 
 # Runtime stage: JRE only, non-root user
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 RUN useradd --system --uid 10001 atlas
 USER atlas
 COPY --from=build /app.jar /app/app.jar
